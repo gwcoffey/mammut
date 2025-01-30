@@ -1,4 +1,4 @@
-A command-line client for Mastodon
+A (very much work-in-progress) command-line client for Mastodon
 
 
 # Proposed Interface
