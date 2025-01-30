@@ -1,0 +1,15 @@
+{
+  "https://example.com": {
+    "redirect_uri": "http://localhost:5001/auth-callback",
+    "name": "My App",
+    "scopes": [
+      "read"
+    ],
+    "client_secret": "some-secret",
+    "id": "1",
+    "redirect_uris": [
+      "http://localhost:5001/auth-callback"
+    ],
+    "client_id": "some-id"
+  }
+}

@@ -34,7 +34,10 @@ let package = Package(
         ),
         .testTarget(
             name: "mammutTests",
-            dependencies: ["mammut"]
+            dependencies: ["mammut"],
+            resources: [
+                .copy("Resources")
+            ]
         ),
     ]
 )

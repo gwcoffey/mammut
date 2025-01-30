@@ -7,7 +7,7 @@ private enum MastodonApiError: Error {
     case unexpected(String)
 }
 
-public func createApp(instance: URL, appx: CreateAppRequest) async throws -> CreateAppResponse {
+public func createApp(instance: URL, appx: CreateAppRequest) async throws -> OAuthApp {
     guard let url = URL(string: Endpoint.createApp.properties.url, relativeTo: instance)?.absoluteURL else {
         throw MastodonApiError.unexpected("unexpectedly unable to make URL")
     }
@@ -18,11 +18,9 @@ public func createApp(instance: URL, appx: CreateAppRequest) async throws -> Cre
     request.httpBody = try JSONEncoder().encode(appx)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-    logger.info("Call: \(String(describing: request.httpMethod)) \(request) \(String(data: request.httpBody!, encoding: .utf8))")
-
     let (data, _) = try await URLSession.shared.data(for: request)
     do {
-        let response = try JSONDecoder().decode(CreateAppResponse.self, from: data)
+        let response = try JSONDecoder().decode(OAuthApp.self, from: data)
         return response
     } catch {
         logger.info("Response: \(String(describing: String(data: data, encoding: .utf8)))")
@@ -30,7 +28,7 @@ public func createApp(instance: URL, appx: CreateAppRequest) async throws -> Cre
     }
 }
 
-public func getOAuthToken(instance: URL, app: CreateAppResponse, code: String) async throws -> Token {
+public func getOAuthToken(instance: URL, app: OAuthApp, code: String) async throws -> OAuthToken {
     guard let url = URL(string: Endpoint.oauthToken.properties.url, relativeTo: instance)?.absoluteURL else {
         throw MastodonApiError.unexpected("unexpectedly unable to make URL")
     }
@@ -50,11 +48,9 @@ public func getOAuthToken(instance: URL, app: CreateAppResponse, code: String) a
     let formEncodedString = formData.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
     request.httpBody = formEncodedString.data(using: .utf8)
 
-    logger.info("Call: \(String(describing: request.httpMethod)) \(request) \(String(data: request.httpBody!, encoding: .utf8))")
-
     let (data, _) = try await URLSession.shared.data(for: request)
     do {
-        let response = try JSONDecoder().decode(Token.self, from: data)
+        let response = try JSONDecoder().decode(OAuthToken.self, from: data)
         return response
     } catch {
         logger.info("Response: \(String(describing: String(data: data, encoding: .utf8)))")
@@ -110,7 +106,7 @@ public struct CreateAppRequest: Codable {
     }
 }
 
-public struct CreateAppResponse: Codable {
+public struct OAuthApp: Codable, Sendable {
     public let id: String
     public let name: String
     public let website: URL?
@@ -132,7 +128,7 @@ public struct CreateAppResponse: Codable {
     }
 }
 
-public struct Token: Codable {
+public struct OAuthToken: Codable, Sendable {
     public let accessToken: String
     public let tokenType: String
     public let scope: String
